@@ -1,0 +1,235 @@
+body { font-family: 'Sarabun', sans-serif; background: #fff9c4; display: flex; justify-content: center; padding: 20px; }
+.app-card { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 550px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+input, textarea, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+button { cursor: pointer; border: none; font-weight: bold; transition: 0.3s; }
+button:hover { opacity: 0.8; transform: translateY(-1px); }
+.job-card { background: #fefbd8; border-left: 5px solid #ffca28; padding: 15px; margin-bottom: 12px; border-radius: 8px; text-align: left; position: relative; }
+h1{
+    text-align: center;/*สั่งให้ข้อความอยู่ตรงกลาง*/
+}
+/* แก้ไขกล่องครอบหลักให้มีขนาดพอดี */
+.app-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    
+    /* เพิ่มส่วนนี้เข้าไปครับ */
+    width: 90%;            /* กว้าง 90% ของหน้าจอในมือถือ */
+    max-width: 600px;      /* กว้างได้สูงสุดไม่เกิน 600px ในคอมพิวเตอร์ */
+    margin: 20px auto;     /* จัดให้อยู่กึ่งกลางหน้าจอเสมอ */
+}
+
+/* ปรับแต่งกล่องรายการงานแต่ละชิ้น (job-card) */
+.job-card {
+    background: #fffbe6;    /* สีพื้นหลังให้อ่อนลงดูสบายตา */
+    border-left: 5px solid #ffc107;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    text-align: left;
+    position: relative;
+    box-sizing: border-box; 
+    width: 100%;
+    
+}
+.job-card button {
+    position: absolute; /* จัดตำแหน่งแบบสัมบูรณ์เทียบกับกล่อง job-card */
+    top: 15px;          /* ห่างจากขอบบน 15px */
+    right: 15px;        /* ห่างจากขอบขวา 15px */
+    
+    /* บรรทัดนี้คือจุดที่แก้ปัญหาครับ */
+    width: auto;        /* เปลี่ยนจาก 100% เป็น auto หรือกำหนดขนาดที่แน่นอน */
+    min-width: 80px;    /* กำหนดความกว้างขั้นต่ำที่เหมาะสม */
+    max-width: 100px;   /* กำหนดความกว้างสูงสุดไม่ให้ยาวเกินไป */
+    
+    background-color: #28a745; /* สีเขียว */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    box-sizing: border-box;
+}
+.button-group {
+    display: flex;           /* เปิดโหมดจัดแถวแนวนอน */
+    justify-content: center;  /* สั่งให้ลูกๆ (ปุ่ม) วิ่งไปอยู่ตรงกลาง */
+    gap: 10px;               /* ระยะห่างระหว่างปุ่ม */
+    margin-top: 20px;        /* ระยะห่างจากช่องข้างบน */
+}
+button {
+    flex: 1;                /* ให้ทั้งสองปุ่มแบ่งพื้นที่เท่าๆ กัน */
+    padding: 10px 25px;      /* บน-ล่าง 10px, ซ้าย-ขวา 25px (ปุ่มจะดูเป็นทรงสวยขึ้น) */
+    border-radius: 8px;     /* ลบมุมให้ดูทันสมัย */
+    border: none;           /* เอาเส้นขอบออก */
+    cursor: pointer;        /* เปลี่ยนเมาส์เป็นรูปมือเมื่อชี้ */
+    color: white;           /* สีตัวอักษร */
+    font-weight: bold;      /* ตัวอักษรหนา */
+    min-width: 120px;        /* กำหนดความกว้างขั้นต่ำเพื่อให้ปุ่มเท่ากัน */
+    transition: 0.3s;        /* แถม: เวลาเอาเมาส์ชี้จะดูนุ่มนวลขึ้น */
+}
+.btn-save {
+    background-color: #6990e2; /* สีฟ้า */
+}
+
+.btn-Des {
+    background-color: #1a6d75; /* สีเขียวเข้ม */
+}
+.button-detail{
+    display: flex;           /* เปิดโหมดจัดแถวแนวนอน */
+    justify-content: center;  /* สั่งให้ลูกๆ (ปุ่ม) วิ่งไปอยู่ตรงกลาง */
+    gap: 10px;               /* ระยะห่างระหว่างปุ่ม */
+    margin-top: 20px;        /* ระยะห่างจากช่องข้างบน */
+}
+button:hover {
+    opacity: 0.8;            /* ทำให้ปุ่มจางลงนิดนึงเวลาชี้ */
+    transform: scale(1.05);   /* ทำให้ปุ่มขยายใหญ่ขึ้นนิดเดียว */
+}
+input{
+    width: 100%; /*  ให้ขยายกว้างเต็มพื้นที่กล่องสีขาว */
+    padding: 10px; /*  ทำให้ช่องพิมพ์ดูอวบขึ้น พิมพ์ง่ายขึ้น */
+    margin-bottom: 10px; /*  เว้นระยะห่างด้านล่าง 10 พิกเซล เพื่อไม่ให้ช่องติดกันเกินไป */
+    border: 1px solid #ddd; /* ใส่เส้นขอบบางๆ สีเทาอ่อน */
+    border-radius: 5px; /* ลบมุมช่องพิมพ์ให้โค้งนิดหน่อย */
+    display: block; /* สั่งให้ช่องพิมพ์แยกบรรทัดกัน (ไม่วางต่อกันในแถวเดียว) */
+    box-sizing: border-box; /* สำคัญมาก! สั่งให้ขนาด 100% รวมค่า padding แล้ว (ป้องกันช่องทะลุขอบ) */
+}
+.job-item{
+    background: #fff9c4; /* ใส่สีพื้นหลังเหลืองอ่อนเหมือนกระดาษโน้ต */
+    padding: 10px; /* เว้นพื้นที่ข้างในกล่องงาน */
+    margin-top: 10px; /*  เว้นระยะห่างจากงานชิ้นข้างบน */
+    border-left: 5px solid #fbc02d; /* เพิ่มแถบสีเหลืองเข้มที่ "ขอบซ้าย" เพื่อความสวยงาม */
+}
+.job-item {
+    background: #fff9c4;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 5px solid #fbc02d;
+    border-radius: 8px;
+    
+    /* หัวใจสำคัญคือ 2 บรรทัดนี้ครับ */
+    text-align: left;       /* สั่งให้ข้อความทั้งหมดชิดซ้าย */
+    position: relative;    /* เพื่อให้ปุ่มลบอ้างอิงตำแหน่งกับกล่องนี้ได้ */
+    
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.job-item p {
+    margin: 5px 0;         /* กำหนดระยะห่างระหว่างบรรทัดของ วิชา หัวข้อ รายละเอียด */
+    line-height: 1.5;      /* เพิ่มความห่างระหว่างบรรทัดให้อ่านง่ายขึ้น */
+    color: #333;
+}
+/* เพิ่มต่อท้ายไฟล์ style.css เดิม */
+.button-detail button {
+    margin: 5px;
+    transition: 0.3s;
+}
+
+.button-detail button:hover {
+    opacity: 0.8;
+    transform: translateY(-2px);
+}
+/* กำหนดความกว้างของแต่ละคอลัมน์ให้ตรงกัน */
+.table-header, .job-item {
+    display: grid;
+    /* แบ่งเป็น 7 คอลัมน์ (ปรับสัดส่วนตามความเหมาะสม) */
+    grid-template-columns: 1fr 1fr 0.8fr 1fr 1.2fr 1.5fr 0.8fr;
+    gap: 10px;
+    align-items: center;
+    text-align: center;
+}
+
+.job-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9em;
+}
+/* ส่วนหัวตารางและรายการงาน */
+.grid-layout {
+    display: grid;
+    /* แบ่ง 6 คอลัมน์: วันที่สั่ง, กำหนดส่ง, ระดับชั้น, วิชา, หัวข้อ, รายละเอียด */
+    grid-template-columns: 100px 100px 80px 120px 150px 1fr; 
+    gap: 15px;
+    align-items: center;
+    text-align: center;
+}
+
+.table-header {
+    background: #fdf2f7;
+    padding: 15px;
+    border-radius: 15px;
+    color: #d81b60; /* สีชมพูเข้ม */
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.job-card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 18px; /* ความโค้งมนตามรูป */
+    border: 1px solid #fce4ec;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    transition: 0.3s;
+}
+
+.job-card:hover {
+    transform: scale(1.01);
+    box-shadow: 0 6px 15px rgba(244, 143, 177, 0.15);
+}
+
+.job-card div {
+    font-size: 0.85em;
+    color: #555;
+    word-break: break-word;
+}
+
+/* คอลัมน์สุดท้าย (รายละเอียด) ให้ชิดซ้ายเพื่อให้อ่านง่าย */
+.job-card div:last-child {
+    text-align: left;
+    padding-left: 10px;
+}
+/* จัดการ Grid ให้ตรงกับหัวตารางนักเรียน */
+.student-grid {
+    display: grid;
+    /* 7 คอลัมน์: วันที่สั่ง, กำหนดส่ง, ระดับชั้น, วิชา, หัวข้องาน, รายละเอียด, ปุ่มส่งงาน */
+    grid-template-columns: 110px 110px 70px 100px 140px 1fr 80px; 
+    gap: 10px;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+    border-bottom: 1px solid #fce4ec;
+}
+
+.table-header {
+    background: #fdf2f7;
+    color: #d81b60;
+    font-weight: bold;
+    border-radius: 12px;
+}
+
+.job-row {
+    background: white;
+    margin-top: 8px;
+    border-radius: 15px;
+    transition: 0.3s;
+}
+
+.job-row:hover {
+    box-shadow: 0 4px 12px rgba(244, 143, 177, 0.15);
+}
+
+.btn-send {
+    background: #f48fb1;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+

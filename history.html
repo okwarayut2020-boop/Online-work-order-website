@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการส่งงาน - ระบบสั่งงานออนไลน์</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #f48fb1;
+            --soft-pink: #fce4ec;
+            --status-green: #e0f2f1;
+            --text-green: #00897b;
+            --bg-gradient: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center;
+        }
+
+        .container { width: 100%; max-width: 850px; text-align: center; }
+
+        /* ส่วนหัวโปรไฟล์ */
+        .profile-card {
+            background: white; border-radius: 35px; padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 25px;
+        }
+        .avatar {
+            width: 110px; height: 110px; background: #f0f0f0;
+            border-radius: 50%; margin: 0 auto 15px;
+            border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ปุ่ม Tab */
+        .tab-group { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; }
+        .tab-btn {
+            padding: 10px 35px; border-radius: 25px; border: none;
+            cursor: pointer; background: white; color: #777; font-weight: bold;
+            transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .tab-btn.active { background: var(--primary-pink); color: white; }
+
+        /* การ์ดรายการงาน */
+        .history-content {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px; padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .title-left {
+            text-align: left; font-size: 1.3rem; color: #4a148c;
+            margin-bottom: 20px; font-weight: bold; padding-left: 10px;
+        }
+
+        /* ตารางแบบ Grid */
+        .grid-row {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 0.8fr 0.6fr 0.8fr 1.4fr;
+            gap: 15px; align-items: center; padding: 15px;
+        }
+
+        .header-style {
+            background: var(--soft-pink); border-radius: 18px;
+            font-weight: bold; color: #f06292; font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        .data-item {
+            border-bottom: 1px solid #f0f0f0; font-size: 0.85em; color: #444;
+        }
+
+        /* สถานะและปุ่ม */
+        .btn-jpg {
+            background: #bbdefb; border: none; padding: 6px 12px;
+            border-radius: 10px; color: #1976d2; cursor: pointer;
+            font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px;
+        }
+        .badge {
+            padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 0.85em;
+        }
+        .waiting { background: #e8f5e9; color: #2e7d32; } /* รอตรวจ */
+        .checked { background: #fce4ec; color: #d81b60; } /* ตรวจแล้ว */
+        /* 1. ตรวจสอบว่ามี display: none; เพื่อซ่อนไว้ตอนเริ่มต้น */
+.modal {
+    display: none; /* ซ่อนไว้ก่อน จะโชว์เมื่อกดดูรูปเท่านั้น */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8); /* พื้นหลังดำโปร่งแสง */
+}
+
+/* 2. ตั้งค่าปุ่มปิดให้เหมาะสม */
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="profile-card">
+        <div class="avatar">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+        </div>
+        <h2 id="dispStudentName" style="margin: 5px 0;">ชื่อนักศึกษา</h2>
+        <p id="dispStudentID" style="color: #888; margin-bottom: 20px;">รหัสนักศึกษา</p>
+
+        <div class="tab-group">
+            <button class="tab-btn" onclick="location.href='detail.html'">งาน</button>
+            <button class="tab-btn active">งานที่ส่งแล้ว</button>
+        </div>
+
+        <div class="history-content">
+            <div class="title-left">งานที่ส่งแล้ว</div>
+            
+            <div class="grid-row header-style">
+        <div>รหัสนักศึกษา</div>
+        <div>ชื่อ-สกุล</div>
+        <div>ระดับชั้น</div>
+        <div>เลขที่</div>
+        <div>ไฟล์งาน</div>
+        <div>สถานะ</div>
+    </div>
+
+    <div id="history-content">
+        <p style="text-align:center; padding:50px; color:#ccc;">⏳ กำลังโหลดข้อมูลประวัติ...</p>
+    </div>
+        </div>
+    </div>
+</div>
+<div id="imgModal" class="modal" onclick="closeModal()">
+    <span class="close-modal">&times;</span>
+    <img id="modalContent" class="modal-content">
+</div>
+
+<script>
+    function viewFile(url) {
+    if (!url || url === "ไม่ได้แนบไฟล์" || url === "แนบไฟล์") {
+        alert("❌ ไม่พบรูปภาพงานครับ");
+        return;
+    }
+
+    try {
+        // สร้างหน้าต่างใหม่ (Popup) เพื่อโชว์รูป
+        const newWindow = window.open("");
+        newWindow.document.write(`
+                <head><title>ดูรูปภาพงาน</title></head>
+                <body style="margin:0; display:flex; justify-content:center; align-items:center; background:#000;">
+                    <img src="${url}" style="max-width:100%; max-height:100vh; box-shadow:0 0 20px rgba(255,255,255,0.2);">
+        `);
+    } catch (e) {
+        // ถ้า Browser บล็อค Popup ให้เปิดในแท็บปกติ
+        window.open(url, '_blank');
+    }
+}
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxB6wBp9YqJ_nkwM3ufxLoNPDhiBePu-7I79doawsd48aa_us3AlX0S-P0p_jvdQh0h/exec";
+
+    window.onload = function() {
+        // ดึงข้อมูลจาก localStorage มาแสดงที่โปรไฟล์
+        document.getElementById("dispStudentName").innerText = localStorage.getItem("userName") || "ชื่อนักศึกษา";
+        document.getElementById("dispStudentID").innerText = "รหัสนักศึกษา " + (localStorage.getItem("studentID") || "");
+        
+        loadMyHistory();
+    }
+
+    async function loadMyHistory() {
+    const container = document.getElementById("history-content"); // เช็คว่าใน HTML มี ID นี้
+    const myID = localStorage.getItem("studentID"); // ดึงรหัสเราที่เก็บไว้ตอน Login
+
+    try {
+        // ดึงข้อมูลการส่งงาน (action=getSubmissions)
+        const res = await fetch(SCRIPT_URL + "?action=getSubmissions"); 
+        const data = await res.json();
+
+        // 🎯 กรองเฉพาะงานที่เป็นรหัสของเราเท่านั้น
+        const myWorks = data.filter(item => String(item.studentID) === String(myID));
+
+        container.innerHTML = "";
+            myWorks.reverse().forEach(w => {
+                const isChecked = w.status === "ตรวจแล้ว";
+                const row = document.createElement("div");
+                row.className = "grid-row item-style";
+                
+                row.innerHTML = `
+                    <div>${w.studentID}</div>
+                    <div style="text-align: left;">${w.studentName}</div>
+                    <div>${w.classLevel}</div>
+                    <div>${w.stdNo || '-'}</div>
+                
+                    <div><button class="btn-jpg" onclick="viewFile('${w.fileLink}')">🖼️ JPG</button></div>
+                    <div>
+                        <span class="badge ${isChecked ? 'checked' : 'waiting'}">
+                            ${w.status || 'รอตรวจ'}
+                        </span>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = "<p style='text-align:center; color:red;'>เกิดข้อผิดพลาดในการโหลดข้อมูล</p>";
+        }
+    }
+    // ฟังก์ชันเปิดดูรูปภาพ (รองรับ Base64)
+    function viewImage(url) {
+    if (!url || url === "ไม่ได้แนบไฟล์" || url === "แนบไฟล์") {
+        alert("❌ ไม่พบไฟล์งานครับ");
+        return;
+    }
+    // เปิดลิงก์รูปภาพใน Google Drive แท็บใหม่ทันที
+    window.open(url, '_blank');
+}
+</script>
+</body>
+</html>

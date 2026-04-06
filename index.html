@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>เข้าสู่ระบบ - ระบบสั่งงานออนไลน์</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --main-pink: #f48fb1; 
+            --main-purple: #b39ddb;
+            --bg-gradient: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%); 
+        }
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background: var(--bg-gradient); 
+            min-height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center;
+        }
+        .login-card { 
+            background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px);
+            border-radius: 40px; padding: 50px; width: 100%; max-width: 450px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center;
+        }
+        h1 { color: #5e35b1; margin-bottom: 40px; font-size: 1.8em; }
+        .role-btn { 
+            width: 100%; padding: 15px; border-radius: 30px; border: none; 
+            font-size: 1.2em; font-weight: bold; cursor: pointer; margin-bottom: 20px;
+            color: white; transition: 0.3s;
+        }
+        .btn-teacher { background: var(--main-pink); }
+        .btn-student { background: var(--main-purple); }
+        .input-group { background: white; border-radius: 15px; padding: 5px 15px; margin-bottom: 15px; }
+        .input-group input { border: none; padding: 12px; width: 90%; outline: none; font-family: 'Sarabun'; }
+        .btn-submit { background: var(--main-pink); color: white; border: none; padding: 12px 60px; border-radius: 30px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn-back { margin-top: 20px; color: #888; cursor: pointer; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div id="roleView">
+        <h1>ระบบสั่งงานออนไลน์</h1>
+        <button class="role-btn btn-teacher" onclick="showLogin('teacher')">อาจารย์</button>
+        <button class="role-btn btn-student" onclick="showLogin('student')">นักศึกษา</button>
+    </div>
+
+    <div id="teacherView" style="display: none;">
+        <h1>สำหรับอาจารย์</h1>
+        <div class="input-group"><input type="text" id="teacherUser" placeholder="ชื่อผู้ใช้"></div>
+        <div class="input-group"><input type="password" id="teacherPass" placeholder="รหัสผ่าน"></div>
+        <button class="btn-submit" onclick="login('teacher')">เข้าสู่ระบบ</button>
+        <div class="btn-back" onclick="showRole()">ย้อนกลับ</div>
+    </div>
+
+    <div id="studentView" style="display: none;">
+        <h1>สำหรับนักศึกษา</h1>
+        <div class="input-group"><input type="text" id="stdID" placeholder="เลขประจำตัวนักศึกษา"></div>
+        <div class="input-group"><input type="password" id="stdPass" placeholder="รหัสผ่าน"></div>
+        <button class="btn-submit" onclick="login('student')">เข้าสู่ระบบ</button>
+        <div class="btn-back" onclick="showRole()">ย้อนกลับ</div>
+    </div>
+</div>
+
+<script>
+    // ⚠️ อย่าลืมเปลี่ยน URL ของคุณที่นี่
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxB6wBp9YqJ_nkwM3ufxLoNPDhiBePu-7I79doawsd48aa_us3AlX0S-P0p_jvdQh0h/exec";
+
+    function showLogin(role) {
+        document.getElementById("roleView").style.display = "none";
+        document.getElementById(role + "View").style.display = "block";
+    }
+
+    function showRole() {
+        document.getElementById("roleView").style.display = "block";
+        document.getElementById("teacherView").style.display = "none";
+        document.getElementById("studentView").style.display = "none";
+    }
+
+    async function login(role) {
+        let payload = { type: 'login', role: role };
+        if(role === 'teacher') {
+            payload.username = document.getElementById("teacherUser").value;
+            payload.password = document.getElementById("teacherPass").value;
+        } else {
+            payload.studentID = document.getElementById("stdID").value;
+            payload.password = document.getElementById("stdPass").value;
+        }
+
+        try {
+            const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const result = await response.json();
+
+            if (result.status === "success") {
+                localStorage.setItem("userRole", result.role);
+                localStorage.setItem("userName", result.name);
+                if(result.role === 'student') {
+                    localStorage.setItem("studentID", result.id);
+                    localStorage.setItem("myClass", result.classLevel); // เก็บระดับชั้น
+                    window.location.href = "detail.html"; 
+                } else {
+                    window.location.href = "index.html"; 
+                }
+            } else { alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"); }
+        } catch (e) { alert("การเชื่อมต่อผิดพลาด"); }
+    }
+</script>
+</body>
+</html>

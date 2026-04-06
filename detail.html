@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>หน้านักเรียน - ระบบสั่งงานออนไลน์</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --main-pink: #f48fb1; 
+            --bg-gradient: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%); 
+        }
+        
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background: var(--bg-gradient); 
+            min-height: 100vh; margin: 0; padding: 20px;
+            display: flex; justify-content: center;
+        }
+
+        .container { width: 100%; max-width: 1000px; text-align: center; }
+
+        /* ส่วนโปรไฟล์ */
+        .profile-section { 
+            background: rgba(255, 255, 255, 0.7); 
+            border-radius: 25px; padding: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .avatar { 
+            width: 100px; height: 100px; background: #eee; 
+            border-radius: 50%; margin: 0 auto 15px; 
+            border: 4px solid white; overflow: hidden;
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* การตั้งค่า Grid สำหรับหัวข้อและแถวข้อมูล */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1.2fr 0.8fr 1.2fr 1.2fr 2fr 0.8fr;
+            gap: 10px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .table-header { 
+            background: #fdf2f7; 
+            padding: 15px 10px; 
+            border-radius: 10px;
+            font-size: 0.9em; 
+            color: var(--main-pink); 
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .job-card-container { background: white; border-radius: 20px; padding: 15px; min-height: 200px; }
+
+        .job-item { 
+            padding: 15px 10px; 
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 0.85em; 
+            color: #555;
+        }
+
+        .btn-send { 
+            background: var(--main-pink); color: white; border: none; 
+            padding: 8px 15px; border-radius: 15px; cursor: pointer; 
+            font-size: 0.9em; transition: 0.3s;
+        }
+        .btn-send:hover { transform: scale(1.05); background: #f06292; }
+
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 8px 25px; border-radius: 20px; border: none; cursor: pointer; background: white; color: #666; font-weight: bold; }
+        .tab.active { background: var(--main-pink); color: white; }
+        .out { padding: 10px 25px; border-radius: 25px; cursor: pointer; border: none; font-weight: bold; background: white; color: #666; transition: 0.3s; margin-top: 20px;}
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="profile-section">
+        <div class="avatar">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png" alt="Avatar">
+        </div>
+        <h2 id="dispStudentName" style="margin: 5px 0;">กำลังโหลด...</h2>
+        <p id="dispStudentID" style="color: #888; margin-bottom: 20px;">รหัสนักศึกษา</p>
+
+        <div class="tabs">
+            <button class="tab active">งาน</button>
+            <button class="tab" onclick="window.location.href='history.html'">งานที่ส่งแล้ว</button>
+        </div>
+
+        <div class="job-card-container">
+            <div class="table-header grid-layout">
+                <div>วันที่สั่งงาน</div>
+                <div>กำหนดส่ง</div>
+                <div>ระดับชั้น</div>
+                <div>วิชา</div>
+                <div>หัวข้องาน</div>
+                <div>รายละเอียดงาน</div>
+                <div>งาน</div>
+            </div>
+
+            <div id="jobList">
+                <p style="padding:20px; color:#999;">กำลังดึงข้อมูลงานล่าสุด...</p>
+            </div>
+        </div>
+    </div>
+    <button class="out" onclick="logout()">ออกจากระบบ</button>
+</div>
+
+<script>
+    // ⚠️ เปลี่ยน URL ของ Apps Script คุณที่นี่
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxB6wBp9YqJ_nkwM3ufxLoNPDhiBePu-7I79doawsd48aa_us3AlX0S-P0p_jvdQh0h/exec";
+
+    window.onload = function() {
+        // 🎯 ดึงชื่อจาก userName ตามที่ตั้งไว้ในหน้า Login
+        const name = localStorage.getItem("userName");
+        const id = localStorage.getItem("studentID");
+        
+        document.getElementById("dispStudentName").innerText = name || "ไม่ระบุชื่อ";
+        document.getElementById("dispStudentID").innerText = "รหัสนักศึกษา " + (id || "ไม่ระบุรหัส");
+        
+        loadJobsFromSheet();
+    }
+    async function loadJobsFromSheet() {
+        const myClass = localStorage.getItem("myClass"); 
+        const container = document.getElementById("jobList");
+
+        try {
+            const response = await fetch(SCRIPT_URL + "?action=getAssignments");
+            const allJobs = await response.json();
+
+            // 🎯 กรองเฉพาะงานที่ "ระดับชั้น" ตรงกับนักเรียนคนนี้
+            const classJobs = allJobs.filter(job => job.classLevel === myClass);
+
+            container.innerHTML = "";
+
+            if (classJobs.length === 0) {
+                container.innerHTML = `<p style="padding:40px; color:#999;">✨ ยังไม่มีงานสำหรับชั้น ${myClass} ในขณะนี้</p>`;
+                return;
+            }
+
+            // ✅ ฟังก์ชันแปลงวันที่ประหลาดให้เป็นไทย (เช่น 2 เม.ย. 2569)
+            const formatDate = (dateStr) => {
+                if (!dateStr || dateStr === "-" || dateStr === "") return "-";
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr;
+                return d.toLocaleDateString('th-TH', { 
+                    day: 'numeric', month: 'short', year: 'numeric' 
+                });
+            };
+
+            // แสดงงานที่กรองแล้ว (เรียงจากใหม่ไปเก่า)
+            classJobs.reverse().forEach(j => {
+                const div = document.createElement("div");
+                div.className = "job-item grid-layout"; 
+                div.innerHTML = `
+                    <div>${formatDate(j.dateCreate)}</div>
+                    <div>${formatDate(j.dateDeadline)}</div>
+                    <div style="font-weight:bold; color:var(--main-pink);">${j.classLevel || '-'}</div>
+                    <div>${j.vicha || '-'}</div>
+                    <div style="font-weight:500;">${j.head || '-'}</div>
+                    <div class="job-desc">${j.desc || '-'}</div>
+                    <div>
+                        <button class="btn-send" onclick="goToSend('${j.jobId}')">ส่งงาน</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+        } catch (error) {
+            console.error("Error:", error);
+            container.innerHTML = "<p style='color:#999; padding:20px;'>ไม่สามารถโหลดข้อมูลได้ในขณะนี้</p>";
+        }
+    }
+     function goToSend(id) {
+        localStorage.setItem("activeJobId", id);
+        window.location.href = "send.html";
+    }
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
+</script>
+</body>
+</html>

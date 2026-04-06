@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ระบบสั่งงานออนไลน์ - ครู</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --main-pink: #f48fb1; --light-pink: #fce4ec; --bg-soft: #f8f0f6; }
+        body { font-family: 'Sarabun', sans-serif; background: var(--bg-soft); margin: 0; padding: 20px; color: #444; }
+        
+        .container { width: 100%; max-width: 1000px; margin: 0 auto; } /* ขยายความกว้างเล็กน้อย */
+        h1 { text-align: center; color: #333; }
+
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 10px 25px; border-radius: 25px; cursor: pointer; border: none; font-weight: bold; background: white; color: #666; transition: 0.3s; }
+        .tab.active { background: var(--main-pink); color: white; box-shadow: 0 4px 10px rgba(244,143,177,0.4); }
+        .out { padding: 10px 25px; border-radius: 25px; cursor: pointer; border: none; font-weight: bold; background: white; color: #666; transition: 0.3s; margin-top: 20px; }
+
+        .main-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; text-align: left; }
+        
+        label { display: block; font-size: 0.9em; margin-bottom: 8px; color: #666; font-weight: bold; }
+        input, select, textarea { 
+            width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 12px; 
+            background: #fafafa; font-family: 'Sarabun'; box-sizing: border-box;
+        }
+
+        .full-width { grid-column: span 3; }
+        .half-width { grid-column: span 2; }
+
+        .btn-submit { 
+            background: var(--main-pink); color: white; border: none; padding: 15px 40px; 
+            border-radius: 15px; font-size: 1em; cursor: pointer; float: right; font-weight: bold;
+        }
+
+        /* 🎯 ส่วนหัวตารางและรายการงาน */
+        .grid-layout { 
+            display: grid; 
+            grid-template-columns: 100px 100px 80px 120px 150px 1fr; /* กำหนดความกว้างแต่ละคอลัมน์ให้คงที่ */
+            gap: 15px; 
+            align-items: center; 
+            text-align: left;
+        }
+
+        .table-header { 
+            padding: 10px 20px; 
+            font-weight: bold; 
+            color: var(--main-pink); 
+            font-size: 0.9em;
+        }
+
+        .job-item {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 15px;
+            border: 1px solid #fce4ec;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: 0.3s;
+        }
+
+        .job-item:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(244,143,177,0.15); }
+        
+        /* จัดการเรื่องข้อความยาวเกินไป */
+        .text-truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ระบบสั่งงานออนไลน์</h1>
+    
+    <div class="tabs">
+        <button class="tab active">สั่งงาน</button>
+        <button class="tab" onclick="window.location.href='inspect.html'">ตรวจงาน</button>
+    </div>
+
+    <div class="main-card">
+        <h3>สั่งงาน</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>วันที่สั่งงาน</label>
+                <input type="date" id="dateCreate"> 
+            </div>
+            <div>
+                <label>วันที่กำหนดส่งงาน</label>
+                <input type="date" id="dateDeadline">
+            </div>
+            <div>
+                <label>ระดับชั้น</label>
+                <select id="classLevel">
+                    <option value="ม.1">ม.1</option>
+                    <option value="ม.2">ม.2</option>
+                    <option value="ม.3">ม.3</option>
+                    <option value="ม.4">ม.4</option>
+                    <option value="ม.5">ม.5</option>
+                    <option value="ม.6">ม.6</option>
+                </select>
+            </div>
+            <div>
+                <label>วิชา</label>
+                <input type="text" id="jobVicha" placeholder="ระบุวิชา">
+            </div>
+            <div class="half-width">
+                <label>หัวข้องาน</label>
+                <input type="text" id="jobHead" placeholder="ระบุหัวข้อ">
+            </div>
+            <div class="full-width">
+                <label>รายละเอียดงาน</label>
+                <textarea id="jobDetail" rows="3" placeholder="ระบุรายละเอียด..."></textarea>
+            </div>
+        </div>
+        <button class="btn-submit" onclick="saveJob()">🚀 บันทึกและส่งงาน</button>
+        <div style="clear:both;"></div>
+    </div>
+
+    <div class="list-section">
+        <h3 style="text-align: left; margin-bottom: 15px; color: #555;">งานที่สั่ง</h3>
+        <div class="table-header grid-layout">
+            <div>วันที่สั่ง</div>
+            <div>กำหนดส่ง</div>
+            <div>ชั้น</div>
+            <div>วิชา</div>
+            <div>หัวข้อ</div>
+            <div>รายละเอียด</div>
+        </div>
+        <div id="myPostedJobs">
+            <p style="text-align:center; padding:20px; color:#ccc;">กำลังโหลดข้อมูล...</p>
+        </div>
+    </div>
+
+    <button class="out" onclick="window.location.href='login.html'">ออกจากระบบ</button>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxB6wBp9YqJ_nkwM3ufxLoNPDhiBePu-7I79doawsd48aa_us3AlX0S-P0p_jvdQh0h/exec";
+   
+    window.onload = function() {
+        if(document.getElementById("dateCreate")) {
+            document.getElementById("dateCreate").valueAsDate = new Date();
+        }
+        
+        const name = localStorage.getItem("userName");
+        if (!name) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        loadMyPostedJobs();
+    };
+
+    async function saveJob() {
+        const name = localStorage.getItem("userName");
+        const jobData = {
+            type: 'save_assignment',
+            jobId: "JOB-" + Date.now(),
+            vicha: document.getElementById("jobVicha").value,
+            head: document.getElementById("jobHead").value,
+            classLevel: document.getElementById("classLevel").value,
+            dateCreate: document.getElementById("dateCreate").value, 
+            dateDeadline: document.getElementById("dateDeadline").value,
+            desc: document.getElementById("jobDetail").value,
+            owner: name 
+        };
+
+        if(!jobData.vicha || !jobData.head) return alert("กรุณากรอกข้อมูลให้ครบ");
+
+        try {
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(jobData) });
+            alert("บันทึกสำเร็จ!");
+            location.reload(); 
+        } catch (e) { alert("บันทึกผิดพลาด"); }
+    }
+
+    async function loadMyPostedJobs() {
+        const container = document.getElementById("myPostedJobs");
+        const currentTeacher = localStorage.getItem("userName");
+
+        try {
+            const res = await fetch(SCRIPT_URL + "?action=getAssignments");
+            const allJobs = await res.json();
+            
+            const myJobs = allJobs.filter(job => {
+                if (!job.owner || !currentTeacher) return false;
+                return job.owner.toString().trim().toLowerCase() === currentTeacher.toString().trim().toLowerCase();
+            });
+
+            displayJobs(myJobs);
+
+        } catch (e) {
+            container.innerHTML = "<p style='color:red; padding:20px;'>โหลดข้อมูลไม่สำเร็จ: " + e + "</p>";
+        }
+    }
+
+    function displayJobs(jobs) {
+        const container = document.getElementById("myPostedJobs");
+        container.innerHTML = "";
+
+        if (jobs.length === 0) {
+            container.innerHTML = "<p style='text-align:center; padding:20px; color:#999;'>ยังไม่มีรายการงานที่คุณสั่ง</p>";
+            return;
+        }
+
+        jobs.forEach(j => {
+            const formatDate = (dateStr) => {
+                if (!dateStr || dateStr === "" || dateStr === "-") return "-";
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr;
+                return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+            };
+
+            const item = document.createElement("div");
+            item.className = "job-item grid-layout";
+            item.innerHTML = `
+                <div style="font-size: 0.85em;">${formatDate(j.dateCreate)}</div> 
+                <div style="font-size: 0.85em;">${formatDate(j.dateDeadline)}</div>
+                <div style="color: #d81b60; font-weight: bold;">${j.classLevel || '-'}</div>
+                <div class="text-truncate" title="${j.vicha}">${j.vicha || '-'}</div>
+                <div class="text-truncate" style="font-weight: 500;" title="${j.head}">${j.head || '-'}</div>
+                <div title="${j.desc}" style="font-size: 0.85em; color: #777; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; white-space: normal;">
+                    ${j.desc || '-'}
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+</script>
+</body>
+</html>

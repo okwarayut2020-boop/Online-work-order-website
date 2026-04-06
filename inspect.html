@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบสั่งงานออนไลน์ - ตรวจงาน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #f48fb1;
+            --soft-purple: #f3e5f5;
+            --bg-gradient: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center;
+        }
+
+        .container { width: 100%; max-width: 900px; text-align: center; }
+
+        h1 { color: #4a148c; font-size: 24px; margin-bottom: 20px; }
+
+        /* ส่วนหัว Tab */
+        .header-tabs {
+            display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 30px; border-radius: 25px; border: none;
+            cursor: pointer; font-weight: bold; font-family: 'Sarabun';
+            background: white; color: #888; transition: 0.3s;
+        }
+        .tab-btn.active { background: var(--primary-pink); color: white; }
+
+        /* การ์ดแสดงรายการงาน */
+        .inspect-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 30px; padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            text-align: left; font-size: 1.2rem; color: #555;
+            margin-bottom: 20px; margin-left: 10px;
+        }
+
+        /* ตารางแบบ Grid ให้ตรงตามหัวข้อ */
+        .grid-row {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 0.8fr 0.6fr 1fr 1.8fr;
+            gap: 10px; align-items: center; padding: 12px;
+        }
+
+        .table-header {
+            background: #fdf2f7; border-radius: 15px;
+            font-weight: bold; color: #f06292; font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .student-item {
+            border-bottom: 1px solid #eee; font-size: 0.85em; color: #444;
+        }
+
+        /* ปุ่มและสถานะ */
+        .btn-jpg {
+            background-color: #cfe2ff; /* สีฟ้าอ่อน */
+            color: #0d6efd;
+            border: 1px solid #b6d4fe;
+            padding: 5px 10px;
+            border-radius: 5px;
+             cursor: pointer;
+            font-size: 12px;
+        }
+        .status-badge {
+            padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8em;
+        }
+        .status-waiting { background: #e0f2f1; color: #00897b; } /* ส่งงานแล้ว */
+        .status-done { background: #fce4ec; color: #f48fb1; }    /* ตรวจแล้ว */
+
+        .btn-check {
+            background: #f48fb1; color: white; border: none;
+            padding: 5px 10px; border-radius: 15px; cursor: pointer;
+            margin-left: 5px; font-size: 0.8em;
+        }
+
+        /* Modal ดูรูปภาพ */
+        .modal {
+            display: none; position: fixed; z-index: 1000;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); justify-content: center; align-items: center;
+        }
+        .modal-content { max-width: 90%; max-height: 80%; border-radius: 10px; }
+        .close-modal {
+            position: absolute; top: 20px; right: 30px;
+            color: white; font-size: 30px; cursor: pointer;
+        }
+        .btn-pending { background-color: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .btn-done { background-color: #4CAF50; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: default; }
+        
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ระบบสั่งงานออนไลน์</h2>
+    
+    <div class="header-tabs">
+        <button class="tab-btn" onclick="location.href='index.html'">สั่งงาน</button>
+        <button class="tab-btn active">ตรวจงาน</button>
+    </div>
+
+    <div class="inspect-card">
+        <div class="card-title">งานที่นักเรียนส่ง</div>
+        
+        <div class="grid-row table-header">
+            <div>รหัสนักศึกษา</div>
+            <div>ชื่อ-สกุล</div>
+            <div>ระดับชั้น</div>
+            <div>เลขที่</div>
+            <div>ไฟล์งาน</div>
+            <div>สถานะงาน</div>
+        </div>
+
+        <div id="submissionList">
+            </div>
+    </div>
+</div>
+
+<div id="imgModal" class="modal" onclick="closeModal()">
+    <span class="close-modal">&times;</span>
+    <img id="modalContent" class="modal-content">
+</div>
+
+<script>
+     function viewFile(url) {
+    if (!url || url === "ไม่ได้แนบไฟล์" || url === "แนบไฟล์") {
+        alert("❌ ไม่พบรูปภาพงานครับ");
+        return;
+    }
+
+    try {
+        // สร้างหน้าต่างใหม่ (Popup) เพื่อโชว์รูป
+        const newWindow = window.open("");
+        newWindow.document.write(`
+                <head><title>ดูรูปภาพงาน</title></head>
+                <body style="margin:0; display:flex; justify-content:center; align-items:center; background:#000;">
+                    <img src="${url}" style="max-width:100%; max-height:100vh; box-shadow:0 0 20px rgba(255,255,255,0.2);">
+        `);
+    } catch (e) {
+        // ถ้า Browser บล็อค Popup ให้เปิดในแท็บปกติ
+        window.open(url, '_blank');
+    }
+}
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxB6wBp9YqJ_nkwM3ufxLoNPDhiBePu-7I79doawsd48aa_us3AlX0S-P0p_jvdQh0h/exec";
+
+    window.onload = function() {
+        const name = localStorage.getItem("userName");
+        if (!name) {
+            window.location.href = 'login.html';
+            return;
+        }
+        loadSubmissions();
+    };
+async function loadSubmissions() {
+        const container = document.getElementById("submissionList");
+        const currentTeacher = localStorage.getItem("userName");
+
+        try {
+            const resJobs = await fetch(SCRIPT_URL + "?action=getAssignments");
+            const allJobs = await resJobs.json();
+            
+            const myJobIDs = allJobs
+                .filter(job => {
+                    const owner = job.owner || job['ชื่อครูผู้สั่ง'] || job['เจ้าของงาน'];
+                    return owner && owner.toString().trim().toLowerCase() === currentTeacher.toString().trim().toLowerCase();
+                })
+                .map(job => job.jobId || job['รหัสงาน']);
+
+            const resSub = await fetch(SCRIPT_URL + "?action=getSubmissions");
+            const allSubmissions = await resSub.json();
+
+            // 🎯 ปรับการ Filter ให้รองรับทั้ง jobId และ JobID (ตัวเล็กตัวใหญ่)
+            // แก้ไขในหน้า inspect.html ตรงส่วน filter
+        // 🎯 ปรับการ Filter ให้รองรับทุกรูปแบบการพิมพ์
+const mySubmissions = allSubmissions.filter(sub => {
+    // ดึงค่า JobID ออกมาโดยเช็คหลายๆ แบบ เผื่อพิมพ์ผิด
+    const currentJobID = sub.JobID || sub.jobId || sub.jobid || sub['รหัสงาน'];
+    
+    // ถ้าไม่มี JobID ในรายการส่งงานชิ้นนี้ ให้ข้ามไป
+    if (!currentJobID) return false;
+
+    // ตรวจสอบว่า JobID นี้ (แบบล้างช่องว่าง) ตรงกับงานของครูคนนี้ไหม
+    return myJobIDs.some(id => id.toString().trim() === currentJobID.toString().trim());
+});
+
+            displaySubmissions(mySubmissions);
+
+        } catch (e) {
+            container.innerHTML = "<p style='color:red;'>ข้อผิดพลาด: " + e + "</p>";
+        }
+    }
+
+    function displaySubmissions(subs) {
+        const container = document.getElementById("submissionList");
+        container.innerHTML = "";
+
+        if (subs.length === 0) {
+            container.innerHTML = "<p style='text-align:center; padding:20px; color:#999;'>ไม่พบงานที่คุณสั่ง</p>";
+            return;
+        }
+
+        subs.forEach(s => {
+            // 🔍 ดักจับทุกชื่อคอลัมน์ที่เป็นไปได้จาก Google Sheet
+            const stdID = s.studentID || s['รหัสนักศึกษา'] || s['รหัสนักเรียน'] || '-';
+            const stdName = s.studentName || s['ชื่อ-สกุล'] || s['ชื่อนามสกุล'] || '-';
+            const classLv = s.classLevel || s['ระดับชั้น'] || '-';
+            const stdNo = s.stdNo || s['เลขที่'] || '-';
+            const status = s.status || s['สถานะ'] || s['สถานะงาน'] || 'รอตรวจ';
+            const fileLink = s.fileLink || s['ไฟล์งาน'] || s['แนบไฟล์'] || '';
+            
+            // ดักจับ JobID สำหรับส่งไปอัปเดตสถานะ
+            const currentJobID = s.jobId || s.JobID || s['รหัสงาน'];
+
+            const item = document.createElement("div");
+            item.className = "student-item grid-row"; 
+            item.innerHTML = `
+                <div>${stdID}</div>
+                <div style="text-align: left;">${stdName}</div>
+                <div style="color: #d81b60; font-weight:bold;">${classLv}</div>
+                <div>${stdNo}</div>
+                <div>
+                    ${fileLink && fileLink !== '-' ? `<button onclick="viewFile('${fileLink}')" class="btn-jpg">🖼️ ดูรูปงาน</button>` : '<span style="color:#ccc">ไม่มีไฟล์</span>'}
+                </div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                    <span class="status-badge ${status === 'ตรวจแล้ว' ? 'status-done' : 'status-waiting'}">
+                        ${status}
+                    </span>
+                    
+                    ${status !== 'ตรวจแล้ว' ? `
+                        <button class="btn-check" onclick="updateStatus('${currentJobID}', '${stdID}')">
+                            ✅ ตรวจงาน
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+async function updateStatus(jobId, studentID) {
+    if(!confirm("ยืนยันการตรวจงานของนักเรียนคนนี้ใช่หรือไม่?")) return;
+
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                type: 'update_status',
+                jobId: jobId,
+                studentID: studentID
+            })
+        });
+        const result = await response.json();
+        
+        if(result.status === "success") {
+            alert("✅ ตรวจงานและแจ้งสถานะนักเรียนเรียบร้อย!");
+            // หลังจากกดตกลง ให้โหลดข้อมูลใหม่ทันที
+            loadSubmissions(); 
+        } else {
+            alert("❌ เกิดข้อผิดพลาด: " + result.message);
+        }
+    } catch (e) {
+        console.error("Error updating status:", e);
+        alert("⚠️ ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
+    }
+}
+</script>
+</body>
+</html>
